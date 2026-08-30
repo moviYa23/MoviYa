@@ -1,0 +1,136 @@
+version: '3.8'
+
+services:
+  # Frontend - Next.js con SSR, Glassmorphism y Dark Mode
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: moviyang_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_BLOCKCHAIN_RPC=https://bsc-dataseed1.binance.org
+    depends_on:
+      - orchestrator
+    networks:
+      - moviyang_network
+    restart: unless-stopped
+
+  # Orquestador Central - Master Node Router (Python/FastAPI)
+  orchestrator:
+    build:
+      context: ./orchestrator
+      dockerfile: Dockerfile
+    container_name: moviyang_orchestrator
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://moviyang:moviyang123@postgres:5432/moviyang_db
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - BINANCE_PAY_KEY=${BINANCE_PAY_KEY}
+      - BINANCE_PAY_SECRET=${BINANCE_PAY_SECRET}
+    depends_on:
+      - postgres
+      - redis
+      - ecommerce
+      - logistics
+    networks:
+      - moviyang_network
+    restart: unless-stopped
+
+  # Motor E-commerce (Go) - Scraping y agregación de precios
+  ecommerce:
+    build:
+      context: ./services/ecommerce
+      dockerfile: Dockerfile
+    container_name: moviyang_ecommerce
+    ports:
+      - "8001:8001"
+    environment:
+      - LOG_LEVEL=info
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://moviyang:moviyang123@postgres:5432/moviyang_db
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - moviyang_network
+    restart: unless-stopped
+
+  # Motor Logístico (Go) - Integración con APIs de transporte
+  logistics:
+    build:
+      context: ./services/logistics
+      dockerfile: Dockerfile
+    container_name: moviyang_logistics
+    ports:
+      - "8002:8002"
+    environment:
+      - LOG_LEVEL=info
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://moviyang:moviyang123@postgres:5432/moviyang_db
+      - UBER_API_KEY=${UBER_API_KEY}
+      - DIDI_API_KEY=${DIDI_API_KEY}
+      - RAPPI_API_KEY=${RAPPI_API_KEY}
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - moviyang_network
+    restart: unless-stopped
+
+  # Base de Datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: moviyang_postgres
+    environment:
+      - POSTGRES_USER=moviyang
+      - POSTGRES_PASSWORD=moviyang123
+      - POSTGRES_DB=moviyang_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - moviyang_network
+    restart: unless-stopped
+
+  # Redis - Cache y Message Queue
+  redis:
+    image: redis:7-alpine
+    container_name: moviyang_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - moviyang_network
+    restart: unless-stopped
+
+  # Blockchain Node Listener (opcional - para sincronización de eventos Web3)
+  blockchain_listener:
+    build:
+      context: ./blockchain
+      dockerfile: Dockerfile
+    container_name: moviyang_blockchain
+    environment:
+      - BLOCKCHAIN_RPC=https://bsc-dataseed1.binance.org
+      - CONTRACT_ADDRESS=${MOVIYANG_TOKEN_ADDRESS}
+      - PRIVATE_KEY=${BLOCKCHAIN_PRIVATE_KEY}
+    depends_on:
+      - postgres
+    networks:
+      - moviyang_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  moviyang_network:
+    driver: bridge
