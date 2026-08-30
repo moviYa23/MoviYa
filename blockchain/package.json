@@ -1,0 +1,22 @@
+{
+  "name": "moviyang-blockchain",
+  "version": "2.0.0",
+  "description": "MoviYa Smart Contracts - Web3 & Tokenomics",
+  "main": "hardhat.config.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:bsc-testnet": "hardhat run scripts/deploy.js --network bsc-testnet",
+    "deploy:bsc-mainnet": "hardhat run scripts/deploy.js --network bsc-mainnet",
+    "verify": "hardhat verify"
+  },
+  "devDependencies": {
+    "@openzeppelin/contracts": "^4.9.3",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "hardhat": "^2.17.0",
+    "hardhat-gas-reporter": "^1.0.8",
+    "solidity-coverage": "^0.8.4",
+    "ethers": "^6.9.0"
+  }
+}
