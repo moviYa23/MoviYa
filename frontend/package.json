@@ -1,0 +1,36 @@
+{
+  "name": "moviyang-frontend",
+  "version": "2.0.0",
+  "description": "MoviYa Frontend - E-Commerce & Logistics Platform with AI Orchestration",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.3.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "axios": "^1.6.0",
+    "web3": "^1.10.0",
+    "ethers": "^6.9.0",
+    "wagmi": "^1.4.0",
+    "@rainbow-me/rainbowkit": "^1.2.0",
+    "zustand": "^4.4.0",
+    "react-query": "^3.39.0",
+    "framer-motion": "^10.16.0",
+    "lucide-react": "^0.292.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0"
+  }
+}
